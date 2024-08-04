@@ -10,12 +10,12 @@ const calendar = document.querySelector(".calendar"),
   eventDate = document.querySelector(".event-date"),
   eventsContainer = document.querySelector(".events"),
   addEventBtn = document.querySelector(".add-event"),
-  addEventWrapper = document.querySelector(".add-event-wrapper "),
-  addEventCloseBtn = document.querySelector(".close "),
-  addEventTitle = document.querySelector(".event-name "),
-  addEventFrom = document.querySelector(".event-time-from "),
-  addEventTo = document.querySelector(".event-time-to "),
-  addEventSubmit = document.querySelector(".add-event-btn ");
+  addEventWrapper = document.querySelector(".add-event-wrapper"),
+  addEventCloseBtn = document.querySelector(".close"),
+  addEventTitle = document.querySelector(".event-name"),
+  addEventRepetisi = document.querySelector(".event-repetisi"),
+  addEventSet = document.querySelector(".event-set"),
+  addEventSubmit = document.querySelector(".add-event-btn");
 
 let today = new Date();
 let activeDay;
@@ -32,16 +32,16 @@ const months = [
   "Juli",
   "Agustus",
   "September",
-  "October",
+  "Oktober",
   "November",
-  "December",
+  "Desember",
 ];
 
 const eventsArr = [];
 getEvents();
 console.log(eventsArr);
 
-//function to add days in days with class day and prev-date next-date on previous month and next month days and active on today
+// Function to initialize the calendar
 function initCalendar() {
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
@@ -60,7 +60,6 @@ function initCalendar() {
   }
 
   for (let i = 1; i <= lastDate; i++) {
-    //check if event is present on that day
     let event = false;
     eventsArr.forEach((eventObj) => {
       if (
@@ -79,17 +78,9 @@ function initCalendar() {
       activeDay = i;
       getActiveDay(i);
       updateEvents(i);
-      if (event) {
-        days += `<div class="day today active event">${i}</div>`;
-      } else {
-        days += `<div class="day today active">${i}</div>`;
-      }
+      days += `<div class="day today active${event ? ' event' : ''}">${i}</div>`;
     } else {
-      if (event) {
-        days += `<div class="day event">${i}</div>`;
-      } else {
-        days += `<div class="day ">${i}</div>`;
-      }
+      days += `<div class="day${event ? ' event' : ''}">${i}</div>`;
     }
   }
 
@@ -100,31 +91,7 @@ function initCalendar() {
   addListner();
 }
 
-//function to add month and year on prev and next button
-function prevMonth() {
-  month--;
-  if (month < 0) {
-    month = 11;
-    year--;
-  }
-  initCalendar();
-}
-
-function nextMonth() {
-  month++;
-  if (month > 11) {
-    month = 0;
-    year++;
-  }
-  initCalendar();
-}
-
-prev.addEventListener("click", prevMonth);
-next.addEventListener("click", nextMonth);
-
-initCalendar();
-
-//function to add active on day
+// Function to add active class on day
 function addListner() {
   const days = document.querySelectorAll(".day");
   days.forEach((day) => {
@@ -198,7 +165,6 @@ dateInput.addEventListener("input", (e) => {
 gotoBtn.addEventListener("click", gotoDate);
 
 function gotoDate() {
-  console.log("here");
   const dateArr = dateInput.value.split("/");
   if (dateArr.length === 2) {
     if (dateArr[0] > 0 && dateArr[0] < 13 && dateArr[1].length === 4) {
@@ -211,7 +177,6 @@ function gotoDate() {
   alert("Invalid Date");
 }
 
-//function get active day day name and date and update eventday eventdate
 function getActiveDay(date) {
   const day = new Date(year, month, date);
   const dayName = day.toString().split(" ")[0];
@@ -219,7 +184,6 @@ function getActiveDay(date) {
   eventDate.innerHTML = date + " " + months[month] + " " + year;
 }
 
-//function update events when a day is active
 function updateEvents(date) {
   let events = "";
   eventsArr.forEach((event) => {
@@ -228,29 +192,27 @@ function updateEvents(date) {
       month + 1 === event.month &&
       year === event.year
     ) {
-      event.events.forEach((event) => {
-        events += `<div class="event">
-            <div class="title">
-              <i class="fas fa-circle"></i>
-              <h3 class="event-title">${event.title}</h3>
-            </div>
-            <div class="event-time">
-              <span class="event-time">${event.time}</span>
-            </div>
-        </div>`;
-      });
+      events += `<div class="event">
+          <div class="title">
+            <i class="fas fa-circle"></i>
+            <h3 class="event-title">${event.title}</h3>
+          </div>
+          <div class="event-time">
+            Repetisi: <span class="event-repetisi">${event.repetisi}</span> -
+            Set: <span class="event-set">${event.set}</span>
+          </div>
+      </div>`;
     }
   });
   if (events === "") {
     events = `<div class="no-event">
-            <h3>No Events</h3>
-        </div>`;
+        <h3>No Events</h3>
+    </div>`;
   }
   eventsContainer.innerHTML = events;
-  saveEvents();
 }
 
-//function to add event
+
 addEventBtn.addEventListener("click", () => {
   addEventWrapper.classList.toggle("active");
 });
@@ -265,190 +227,156 @@ document.addEventListener("click", (e) => {
   }
 });
 
-//allow 50 chars in eventtitle
 addEventTitle.addEventListener("input", (e) => {
   addEventTitle.value = addEventTitle.value.slice(0, 60);
 });
 
-//allow only time in eventtime from and to
-addEventFrom.addEventListener("input", (e) => {
-  addEventFrom.value = addEventFrom.value.replace(/[^0-9:]/g, "");
-  if (addEventFrom.value.length === 2) {
-    addEventFrom.value += ":";
-  }
-  if (addEventFrom.value.length > 5) {
-    addEventFrom.value = addEventFrom.value.slice(0, 5);
-  }
+addEventRepetisi.addEventListener("input", (e) => {
+  addEventRepetisi.value = addEventRepetisi.value.replace(/[^0-9]/g, "");
 });
 
-addEventTo.addEventListener("input", (e) => {
-  addEventTo.value = addEventTo.value.replace(/[^0-9:]/g, "");
-  if (addEventTo.value.length === 2) {
-    addEventTo.value += ":";
-  }
-  if (addEventTo.value.length > 5) {
-    addEventTo.value = addEventTo.value.slice(0, 5);
-  }
+addEventSet.addEventListener("input", (e) => {
+  addEventSet.value = addEventSet.value.replace(/[^0-9x\s]/g, ""); // Hanya angka, x, dan spasi
 });
 
-//function to add event to eventsArr
-addEventSubmit.addEventListener("click", () => {
+addEventSubmit.addEventListener("click", async () => {
   const eventTitle = addEventTitle.value;
-  const eventTimeFrom = addEventFrom.value;
-  const eventTimeTo = addEventTo.value;
-  if (eventTitle === "" || eventTimeFrom === "" || eventTimeTo === "") {
+  const eventRepetisi = addEventRepetisi.value;
+  const eventSet = addEventSet.value;
+
+  if (eventTitle === "" || eventRepetisi === "" || eventSet === "") {
     alert("Please fill all the fields");
     return;
   }
 
-  //check correct time format 24 hour
-  const timeFromArr = eventTimeFrom.split(":");
-  const timeToArr = eventTimeTo.split(":");
-  if (
-    timeFromArr.length !== 2 ||
-    timeToArr.length !== 2 ||
-    timeFromArr[0] > 23 ||
-    timeFromArr[1] > 59 ||
-    timeToArr[0] > 23 ||
-    timeToArr[1] > 59
-  ) {
-    alert("Invalid Time Format");
-    return;
-  }
-
-  const timeFrom = convertTime(eventTimeFrom);
-  const timeTo = convertTime(eventTimeTo);
-
-  //check if event is already added
-  let eventExist = false;
-  eventsArr.forEach((event) => {
-    if (
-      event.day === activeDay &&
-      event.month === month + 1 &&
-      event.year === year
-    ) {
-      event.events.forEach((event) => {
-        if (event.title === eventTitle) {
-          eventExist = true;
-        }
-      });
-    }
-  });
-  if (eventExist) {
-    alert("Event already added");
-    return;
-  }
   const newEvent = {
     title: eventTitle,
-    time: timeFrom + " - " + timeTo,
+    repetisi: eventRepetisi,
+    set: eventSet,
+    day: activeDay,
+    month: month + 1,
+    year: year,
   };
-  console.log(newEvent);
-  console.log(activeDay);
-  let eventAdded = false;
-  if (eventsArr.length > 0) {
-    eventsArr.forEach((item) => {
-      if (
-        item.day === activeDay &&
-        item.month === month + 1 &&
-        item.year === year
-      ) {
-        item.events.push(newEvent);
-        eventAdded = true;
-      }
-    });
-  }
 
-  if (!eventAdded) {
-    eventsArr.push({
-      day: activeDay,
-      month: month + 1,
-      year: year,
-      events: [newEvent],
-    });
-  }
+  await addEvent(newEvent);
 
-  console.log(eventsArr);
-  addEventWrapper.classList.remove("active");
-  addEventTitle.value = "";
-  addEventFrom.value = "";
-  addEventTo.value = "";
+  // Memperbarui data eventsArr dan tampilan
+  eventsArr.push(newEvent); // Tambahkan event baru ke array
   updateEvents(activeDay);
-  //select active day and add event class if not added
+  addEventTitle.value = "";
+  addEventRepetisi.value = "";
+  addEventSet.value = "";
+  addEventWrapper.classList.remove("active");
+
+  // Select active day and add event class if not added
   const activeDayEl = document.querySelector(".day.active");
   if (!activeDayEl.classList.contains("event")) {
     activeDayEl.classList.add("event");
   }
 });
 
-//function to delete event when clicked on event
-eventsContainer.addEventListener("click", (e) => {
+// Update the delete event function
+eventsContainer.addEventListener("click", async (e) => {
   if (e.target.classList.contains("event")) {
     if (confirm("Are you sure you want to delete this event?")) {
       const eventTitle = e.target.children[0].children[1].innerHTML;
-      eventsArr.forEach((event) => {
-        if (
-          event.day === activeDay &&
-          event.month === month + 1 &&
-          event.year === year
-        ) {
-          event.events.forEach((item, index) => {
-            if (item.title === eventTitle) {
-              event.events.splice(index, 1);
-            }
-          });
-          //if no events left in a day then remove that day from eventsArr
-          if (event.events.length === 0) {
-            eventsArr.splice(eventsArr.indexOf(event), 1);
-            //remove event class from day
-            const activeDayEl = document.querySelector(".day.active");
-            if (activeDayEl.classList.contains("event")) {
-              activeDayEl.classList.remove("event");
-            }
-          }
-        }
-      });
-      updateEvents(activeDay);
+      const eventToDelete = eventsArr.find(event => event.events.some(item => item.title === eventTitle));
+      if (eventToDelete) {
+        await deleteEvent(eventToDelete.id);
+        updateEvents(activeDay);
+      }
     }
   }
 });
 
-//function to save events in local storage
+
+function getEvents() {
+  const events = localStorage.getItem("events");
+  if (events) {
+    const parsedEvents = JSON.parse(events);
+    parsedEvents.forEach((event) => {
+      eventsArr.push(event);
+    });
+  }
+}
+
 function saveEvents() {
   localStorage.setItem("events", JSON.stringify(eventsArr));
 }
 
-//function to get events from local storage
-function getEvents() {
-  //check if events are already saved in local storage then return event else nothing
-  if (localStorage.getItem("events") === null) {
-    return;
+function prevMonth() {
+  month--;
+  if (month < 0) {
+    month = 11;
+    year--;
   }
-  eventsArr.push(...JSON.parse(localStorage.getItem("events")));
+  initCalendar();
 }
 
-function convertTime(time) {
-  //convert time to 24 hour format
-  let timeArr = time.split(":");
-  let timeHour = timeArr[0];
-  let timeMin = timeArr[1];
-  let timeFormat = timeHour >= 12 ? "PM" : "AM";
-  timeHour = timeHour % 12 || 12;
-  time = timeHour + ":" + timeMin + " " + timeFormat;
-  return time;
+function nextMonth() {
+  month++;
+  if (month > 11) {
+    month = 0;
+    year++;
+  }
+  initCalendar();
 }
 
-// Mengambil semua to-do list
-fetch('https://calendar-umber-one.vercel.app//todos')
-  .then(response => response.json())
-  .then(data => console.log(data));
+initCalendar();
 
-// Menambahkan to-do list baru
-fetch('https://calendar-umber-one.vercel.app//todos', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({ title: 'New To-Do' }),
-})
-  .then(response => response.json())
-  .then(data => console.log(data));
+// Function to delete event
+
+
+
+// Database
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = 'https://wnvmhonxufurmocduifg.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indudm1ob254dWZ1cm1vY2R1aWZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjI4MDg4MjgsImV4cCI6MjAzODM4NDgyOH0.NiqWMZXMygG4kjS5ofarmPf8oA7CmnQxoxHCuKqUPpE';
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+// Fungsi untuk mendapatkan data acara
+async function getEvents() {
+  const { data, error } = await supabase
+    .from('events')
+    .select('*');
+  if (error) {
+    console.error('Error fetching events:', error);
+  } else {
+    console.log(data); // Pastikan data ditampilkan di console
+    return data;
+  }
+}
+
+
+// Fungsi untuk menambahkan acara
+async function addEvent(event) {
+  const { data, error } = await supabase
+    .from('events')
+    .insert([event]);
+  if (error) {
+    console.error('Error adding event:', error);
+  } else {
+    return data;
+  }
+}
+
+// Fungsi untuk menghapus acara
+async function deleteEvent(id) {
+  const { data, error } = await supabase
+    .from('events')
+    .delete()
+    .match({ id });
+  if (error) {
+    console.error('Error deleting event:', error);
+  } else {
+    return data;
+  }
+}
+
+// Panggil fungsi ini saat halaman dimuat
+(async function() {
+  eventsArr = await getEvents(); // Perbarui eventsArr dengan data dari database
+  initCalendar(); // Inisialisasi kalender dengan data terbaru
+})();
+
