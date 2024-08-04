@@ -436,3 +436,19 @@ function convertTime(time) {
   time = timeHour + ":" + timeMin + " " + timeFormat;
   return time;
 }
+
+// Mengambil semua to-do list
+fetch('https://calendar-umber-one.vercel.app//todos')
+  .then(response => response.json())
+  .then(data => console.log(data));
+
+// Menambahkan to-do list baru
+fetch('https://calendar-umber-one.vercel.app//todos', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({ title: 'New To-Do' }),
+})
+  .then(response => response.json())
+  .then(data => console.log(data));
