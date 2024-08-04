@@ -739,7 +739,7 @@ addEventRepetisi.addEventListener("input", (e)=>{
     addEventRepetisi.value = addEventRepetisi.value.replace(/[^0-9]/g, "");
 });
 addEventSet.addEventListener("input", (e)=>{
-    addEventSet.value = addEventSet.value.replace(/[^0-9x\s]/g, ""); // Hanya angka, x, dan spasi
+    addEventSet.value = addEventSet.value.replace(/[^0-9x\smenitdetik]/g, ""); // Hanya angka, x, spasi, 'menit', dan 'detik'
 });
 addEventSubmit.addEventListener("click", async ()=>{
     const eventTitle = addEventTitle.value;
