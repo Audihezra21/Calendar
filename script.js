@@ -37,8 +37,7 @@ const months = [
   "Desember",
 ];
 
-const eventsArr = [];
-getEvents();
+let eventsArr = [];
 console.log(eventsArr);
 
 // Function to initialize the calendar
@@ -258,20 +257,21 @@ addEventSubmit.addEventListener("click", async () => {
     year: year,
   };
 
-  await addEvent(newEvent);
+  const data = await addEvent(newEvent);
+  if (data) {
+    // Memperbarui data eventsArr dan tampilan
+    eventsArr.push(newEvent); // Tambahkan event baru ke array
+    updateEvents(activeDay);
+    addEventTitle.value = "";
+    addEventRepetisi.value = "";
+    addEventSet.value = "";
+    addEventWrapper.classList.remove("active");
 
-  // Memperbarui data eventsArr dan tampilan
-  eventsArr.push(newEvent); // Tambahkan event baru ke array
-  updateEvents(activeDay);
-  addEventTitle.value = "";
-  addEventRepetisi.value = "";
-  addEventSet.value = "";
-  addEventWrapper.classList.remove("active");
-
-  // Select active day and add event class if not added
-  const activeDayEl = document.querySelector(".day.active");
-  if (!activeDayEl.classList.contains("event")) {
-    activeDayEl.classList.add("event");
+    // Select active day and add event class if not added
+    const activeDayEl = document.querySelector(".day.active");
+    if (!activeDayEl.classList.contains("event")) {
+      activeDayEl.classList.add("event");
+    }
   }
 });
 
@@ -280,25 +280,19 @@ eventsContainer.addEventListener("click", async (e) => {
   if (e.target.classList.contains("event")) {
     if (confirm("Are you sure you want to delete this event?")) {
       const eventTitle = e.target.children[0].children[1].innerHTML;
-      const eventToDelete = eventsArr.find(event => event.events.some(item => item.title === eventTitle));
+      const eventToDelete = eventsArr.find(event => event.title === eventTitle && event.day === activeDay && event.month === month + 1 && event.year === year);
       if (eventToDelete) {
-        await deleteEvent(eventToDelete.id);
-        updateEvents(activeDay);
+        const data = await deleteEvent(eventToDelete.id);
+        if (data) {
+          // Remove the event from the array
+          eventsArr = eventsArr.filter(event => event.id !== eventToDelete.id);
+          updateEvents(activeDay);
+        }
       }
     }
   }
 });
 
-
-function getEvents() {
-  const events = localStorage.getItem("events");
-  if (events) {
-    const parsedEvents = JSON.parse(events);
-    parsedEvents.forEach((event) => {
-      eventsArr.push(event);
-    });
-  }
-}
 
 function saveEvents() {
   localStorage.setItem("events", JSON.stringify(eventsArr));
@@ -324,10 +318,6 @@ function nextMonth() {
 
 initCalendar();
 
-// Function to delete event
-
-
-
 // Database
 import { createClient } from '@supabase/supabase-js';
 
@@ -343,11 +333,10 @@ async function getEvents() {
   if (error) {
     console.error('Error fetching events:', error);
   } else {
-    console.log(data); // Pastikan data ditampilkan di console
-    return data;
+    eventsArr = data; // Perbarui eventsArr dengan data dari database
+    console.log(eventsArr); // Pastikan data ditampilkan di console
   }
 }
-
 
 // Fungsi untuk menambahkan acara
 async function addEvent(event) {
@@ -376,7 +365,6 @@ async function deleteEvent(id) {
 
 // Panggil fungsi ini saat halaman dimuat
 (async function() {
-  eventsArr = await getEvents(); // Perbarui eventsArr dengan data dari database
+  await getEvents(); // Tunggu hingga data acara diambil
   initCalendar(); // Inisialisasi kalender dengan data terbaru
 })();
-
